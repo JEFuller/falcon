@@ -15,6 +15,7 @@
 """Response class."""
 
 import functools
+from io import BufferedReader
 import mimetypes
 from typing import Optional
 
@@ -174,6 +175,8 @@ class Response:
     # Child classes may override this
     context_type = structures.Context
 
+    stream: Optional[BufferedReader]
+
     def __init__(self, options=None):
         self.status = '200 OK'
         self._headers = {}
@@ -306,7 +309,7 @@ class Response:
     def __repr__(self):
         return '<%s: %s>' % (self.__class__.__name__, self.status)
 
-    def set_stream(self, stream, content_length):
+    def set_stream(self, stream: BufferedReader, content_length: int) -> None:
         """Set both `stream` and `content_length`.
 
         Although the :attr:`~falcon.Response.stream` and

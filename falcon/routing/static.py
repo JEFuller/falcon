@@ -4,10 +4,14 @@ import os
 import re
 
 import falcon
+from falcon.request import Request
+from falcon.response import Response
 from falcon.util.sync import get_running_loop
 
 
-def _open_range(file_path, req_range):
+def _open_range(
+    file_path, req_range
+) -> tuple[io.BufferedReader, int, tuple[int, int, int] | None]:
     """Open a file for a ranged request.
 
     Args:
@@ -58,7 +62,7 @@ def _open_range(file_path, req_range):
     return _BoundedFile(fh, length), length, (start, end, size)
 
 
-class _BoundedFile:
+class _BoundedFile(io.BufferedReader):
     """Wrap a file to only allow part of it to be read.
 
     Args:
@@ -73,9 +77,9 @@ class _BoundedFile:
         self.close = fh.close
         self.remaining = length
 
-    def read(self, size=-1):
+    def read(self, size: int | None = -1) -> bytes:
         """Read the underlying file object, within the specified bounds."""
-        if size < 0:
+        if size is None or size < 0:
             size = self.remaining
         else:
             size = min(size, self.remaining)
@@ -157,7 +161,7 @@ class StaticRoute:
             return path.startswith(self._prefix)
         return path.startswith(self._prefix) or path == self._prefix[:-1]
 
-    def __call__(self, req, resp):
+    def __call__(self, req: Request, resp: Response):
         """Resource responder for this route."""
 
         without_prefix = req.path[len(self._prefix) :]

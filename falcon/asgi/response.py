@@ -16,6 +16,7 @@
 
 from inspect import iscoroutine
 from inspect import iscoroutinefunction
+from io import BufferedReader
 
 from falcon import response
 from falcon.constants import _UNSET
@@ -209,7 +210,7 @@ class Response(response.Response):
     def sse(self, value):
         self._sse = value
 
-    def set_stream(self, stream, content_length):
+    def set_stream(self, stream: BufferedReader, content_length: int) -> None:
         """Set both `stream` and `content_length`.
 
         Although the :attr:`~falcon.asgi.Response.stream` and
